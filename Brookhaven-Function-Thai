@@ -1,0 +1,546 @@
+-- ============================================================
+-- SIGMA HUB - BROOKHAVEN EDITION
+-- ============================================================
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local LocalPlayer = Players.LocalPlayer
+if not LocalPlayer then
+    LocalPlayer = Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
+end
+
+local VALID_KEY = "SiecvtpjdckTcRuiw512"
+local DISCORD_LINK = "https://discord.gg/4Eke4aFnm"
+
+-- State Variables
+local isRainbowEnabled = false
+local isSpeedEnabled = false
+local isJumpEnabled = false
+local isInfJumpEnabled = false
+local isPlayerESPEnabled = false
+local isDistanceESPEnabled = false
+
+-- Safe PlayerGui Detection
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 15)
+if not PlayerGui then return end
+
+if PlayerGui:FindFirstChild("SigmaHubUI") then
+    PlayerGui.SigmaHubUI:Destroy()
+end
+
+-- GUI Core Setup
+local SigmaGui = Instance.new("ScreenGui")
+SigmaGui.Name = "SigmaHubUI"
+SigmaGui.ResetOnSpawn = false
+SigmaGui.Parent = PlayerGui
+
+local function AddCorner(object, radius)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, radius or 12)
+    corner.Parent = object
+    return corner
+end
+
+local function MakeDraggable(gui)
+    local dragging, dragInput, dragStart, startPos
+    
+    gui.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = gui.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    
+    gui.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+-- MAIN FRAME
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 480, 0, 320)
+MainFrame.Position = UDim2.new(0.5, -240, 0.5, -160)
+MainFrame.BackgroundColor3 = Color3.fromRGB(24, 26, 32)
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
+MainFrame.Parent = SigmaGui
+AddCorner(MainFrame, 16)
+MakeDraggable(MainFrame)
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Color = Color3.fromRGB(0, 170, 255)
+UIStroke.Thickness = 2
+UIStroke.Parent = MainFrame
+
+-- Title Bar
+local TitleBar = Instance.new("Frame")
+TitleBar.Size = UDim2.new(1, 0, 0, 40)
+TitleBar.BackgroundColor3 = Color3.fromRGB(32, 35, 45)
+TitleBar.BorderSizePixel = 0
+TitleBar.Parent = MainFrame
+AddCorner(TitleBar, 16)
+
+local TitleText = Instance.new("TextLabel")
+TitleText.Size = UDim2.new(0.6, 0, 1, 0)
+TitleText.Position = UDim2.new(0, 15, 0, 0)
+TitleText.BackgroundTransparency = 1
+TitleText.Text = "• SIGMA HUB - KEY"
+TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleText.TextSize = 16
+TitleText.Font = Enum.Font.SourceSansBold
+TitleText.TextXAlignment = Enum.TextXAlignment.Left
+TitleText.Parent = TitleBar
+
+local MinimizeBtn = Instance.new("TextButton")
+MinimizeBtn.Size = UDim2.new(0, 30, 0, 30)
+MinimizeBtn.Position = UDim2.new(1, -70, 0, 5)
+MinimizeBtn.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
+MinimizeBtn.Text = "[ - ]"
+MinimizeBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
+MinimizeBtn.Font = Enum.Font.SourceSansBold
+MinimizeBtn.TextSize = 14
+MinimizeBtn.Parent = TitleBar
+AddCorner(MinimizeBtn, 8)
+
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -35, 0, 5)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+CloseBtn.Text = "[ X ]"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.Font = Enum.Font.SourceSansBold
+CloseBtn.TextSize = 14
+CloseBtn.Parent = TitleBar
+AddCorner(CloseBtn, 8)
+
+local DiscordText = Instance.new("TextLabel")
+DiscordText.Size = UDim2.new(1, -30, 0, 25)
+DiscordText.Position = UDim2.new(0, 15, 0, 48)
+DiscordText.BackgroundTransparency = 1
+DiscordText.Text = "📌 " .. DISCORD_LINK
+DiscordText.TextColor3 = Color3.fromRGB(0, 180, 255)
+DiscordText.TextSize = 14
+DiscordText.Font = Enum.Font.SourceSans
+DiscordText.TextXAlignment = Enum.TextXAlignment.Left
+DiscordText.Parent = MainFrame
+
+local MinimizedIcon = Instance.new("TextButton")
+MinimizedIcon.Name = "MinimizedIcon"
+MinimizedIcon.Size = UDim2.new(0, 50, 0, 50)
+MinimizedIcon.Position = UDim2.new(0.05, 0, 0.5, -25)
+MinimizedIcon.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+MinimizedIcon.Text = "S"
+MinimizedIcon.TextColor3 = Color3.fromRGB(0, 200, 255)
+MinimizedIcon.Font = Enum.Font.SourceSansBold
+MinimizedIcon.TextSize = 28
+MinimizedIcon.Visible = false
+MinimizedIcon.Parent = SigmaGui
+AddCorner(MinimizedIcon, 25)
+
+local IconStroke = Instance.new("UIStroke")
+IconStroke.Color = Color3.fromRGB(0, 170, 255)
+IconStroke.Thickness = 3
+IconStroke.Parent = MinimizedIcon
+MakeDraggable(MinimizedIcon)
+
+MinimizeBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+    MinimizedIcon.Visible = true
+end)
+
+MinimizedIcon.MouseButton1Click:Connect(function()
+    MainFrame.Visible = true
+    MinimizedIcon.Visible = false
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    SigmaGui:Destroy()
+end)
+
+-- PAGE 1: KEY SYSTEM
+local KeyPage = Instance.new("Frame")
+KeyPage.Size = UDim2.new(1, -30, 0, 220)
+KeyPage.Position = UDim2.new(0, 15, 0, 80)
+KeyPage.BackgroundTransparency = 1
+KeyPage.Parent = MainFrame
+
+local KeyInputBox = Instance.new("TextBox")
+KeyInputBox.Size = UDim2.new(1, 0, 0, 45)
+KeyInputBox.Position = UDim2.new(0, 0, 0, 10)
+KeyInputBox.BackgroundColor3 = Color3.fromRGB(35, 38, 48)
+KeyInputBox.PlaceholderText = "Enter key..."
+KeyInputBox.PlaceholderColor3 = Color3.fromRGB(120, 130, 150)
+KeyInputBox.Text = ""
+KeyInputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+KeyInputBox.TextSize = 15
+KeyInputBox.Font = Enum.Font.SourceSans
+KeyInputBox.Parent = KeyPage
+AddCorner(KeyInputBox, 10)
+
+local CheckKeyBtn = Instance.new("TextButton")
+CheckKeyBtn.Size = UDim2.new(0.48, 0, 0, 45)
+CheckKeyBtn.Position = UDim2.new(0, 0, 0, 70)
+CheckKeyBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 220)
+CheckKeyBtn.Text = "Check Key"
+CheckKeyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CheckKeyBtn.Font = Enum.Font.SourceSansBold
+CheckKeyBtn.TextSize = 15
+CheckKeyBtn.Parent = KeyPage
+AddCorner(CheckKeyBtn, 10)
+
+local LinkDiscordBtn = Instance.new("TextButton")
+LinkDiscordBtn.Size = UDim2.new(0.48, 0, 0, 45)
+LinkDiscordBtn.Position = UDim2.new(0.52, 0, 0, 70)
+LinkDiscordBtn.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+LinkDiscordBtn.Text = "Link Discord"
+LinkDiscordBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+LinkDiscordBtn.Font = Enum.Font.SourceSansBold
+LinkDiscordBtn.TextSize = 15
+LinkDiscordBtn.Parent = KeyPage
+AddCorner(LinkDiscordBtn, 10)
+
+local BuyKeyNotice = Instance.new("TextLabel")
+BuyKeyNotice.Size = UDim2.new(1, 0, 0, 30)
+BuyKeyNotice.Position = UDim2.new(0, 0, 0, 130)
+BuyKeyNotice.BackgroundTransparency = 1
+BuyKeyNotice.Text = "( คีย์ทักซื้อกับแอดมินได้เลยคร้าบ.. )"
+BuyKeyNotice.TextColor3 = Color3.fromRGB(180, 180, 190)
+BuyKeyNotice.TextSize = 14
+BuyKeyNotice.Font = Enum.Font.SourceSans
+BuyKeyNotice.Parent = KeyPage
+
+LinkDiscordBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        if setclipboard then
+            setclipboard(DISCORD_LINK)
+        end
+    end)
+    LinkDiscordBtn.Text = "คัดลอกสำเร็จ!"
+    task.delay(2, function()
+        LinkDiscordBtn.Text = "Link Discord"
+    end)
+end)
+
+-- PAGE 2: FUNCTION HUB
+local FunctionPage = Instance.new("Frame")
+FunctionPage.Size = UDim2.new(1, -30, 0, 230)
+FunctionPage.Position = UDim2.new(0, 15, 0, 75)
+FunctionPage.BackgroundTransparency = 1
+FunctionPage.Visible = false
+FunctionPage.Parent = MainFrame
+
+local Sidebar = Instance.new("Frame")
+Sidebar.Size = UDim2.new(0, 110, 1, 0)
+Sidebar.BackgroundColor3 = Color3.fromRGB(30, 33, 42)
+Sidebar.Parent = FunctionPage
+AddCorner(Sidebar, 10)
+
+local SidebarLayout = Instance.new("UIListLayout")
+SidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
+SidebarLayout.Padding = UDim.new(0, 6)
+SidebarLayout.Parent = Sidebar
+
+local SidebarPadding = Instance.new("UIPadding")
+SidebarPadding.PaddingTop = UDim.new(0, 6)
+SidebarPadding.PaddingLeft = UDim.new(0, 5)
+SidebarPadding.Parent = Sidebar
+
+local PagesFolder = Instance.new("Frame")
+PagesFolder.Size = UDim2.new(1, -120, 1, 0)
+PagesFolder.Position = UDim2.new(0, 120, 0, 0)
+PagesFolder.BackgroundTransparency = 1
+PagesFolder.Parent = FunctionPage
+
+local tabsList = {}
+
+local function CreateTab(tabName)
+    local TabPage = Instance.new("ScrollingFrame")
+    TabPage.Name = tabName .. "Page"
+    TabPage.Size = UDim2.new(1, 0, 1, 0)
+    TabPage.BackgroundTransparency = 1
+    TabPage.BorderSizePixel = 0
+    TabPage.ScrollBarThickness = 4
+    TabPage.Visible = false
+    TabPage.Parent = PagesFolder
+
+    local UIListLayout = Instance.new("UIListLayout")
+    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    UIListLayout.Padding = UDim.new(0, 8)
+    UIListLayout.Parent = TabPage
+
+    local TabBtn = Instance.new("TextButton")
+    TabBtn.Size = UDim2.new(1, -10, 0, 35)
+    TabBtn.BackgroundColor3 = Color3.fromRGB(40, 45, 58)
+    TabBtn.Text = tabName
+    TabBtn.TextColor3 = Color3.fromRGB(180, 190, 200)
+    TabBtn.Font = Enum.Font.SourceSansBold
+    TabBtn.TextSize = 14
+    TabBtn.Parent = Sidebar
+    AddCorner(TabBtn, 8)
+
+    TabBtn.MouseButton1Click:Connect(function()
+        for _, t in ipairs(tabsList) do
+            t.Page.Visible = false
+            t.Btn.BackgroundColor3 = Color3.fromRGB(40, 45, 58)
+            t.Btn.TextColor3 = Color3.fromRGB(180, 190, 200)
+        end
+        TabPage.Visible = true
+        TabBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 220)
+        TabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end)
+
+    table.insert(tabsList, {Page = TabPage, Btn = TabBtn})
+    return TabPage
+end
+
+local function CreateToggleRow(parentPage, name, callback)
+    local Row = Instance.new("Frame")
+    Row.Size = UDim2.new(1, -8, 0, 45)
+    Row.BackgroundColor3 = Color3.fromRGB(32, 35, 45)
+    Row.Parent = parentPage
+    AddCorner(Row, 10)
+
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(0.65, 0, 1, 0)
+    Label.Position = UDim2.new(0, 12, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = "• " .. name
+    Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Label.TextSize = 14
+    Label.Font = Enum.Font.SourceSansBold
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Parent = Row
+
+    local ToggleBtn = Instance.new("TextButton")
+    ToggleBtn.Size = UDim2.new(0, 75, 0, 30)
+    ToggleBtn.Position = UDim2.new(1, -85, 0.5, -15)
+    ToggleBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+    ToggleBtn.Text = "[ ปิด ]"
+    ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleBtn.Font = Enum.Font.SourceSansBold
+    ToggleBtn.TextSize = 13
+    ToggleBtn.Parent = Row
+    AddCorner(ToggleBtn, 8)
+
+    local state = false
+    ToggleBtn.MouseButton1Click:Connect(function()
+        state = not state
+        if state then
+            ToggleBtn.BackgroundColor3 = Color3.fromRGB(40, 180, 80)
+            ToggleBtn.Text = "[ เปิด ]"
+        else
+            ToggleBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+            ToggleBtn.Text = "[ ปิด ]"
+        end
+        callback(state)
+    end)
+end
+
+-- สร้างเฉพาะ 2 เมนูที่สั่งไว้เท่านั้น
+local MainPage = CreateTab("หน้าหลัก")
+local SystemPage = CreateTab("ระบบ")
+
+tabsList[1].Page.Visible = true
+tabsList[1].Btn.BackgroundColor3 = Color3.fromRGB(0, 150, 220)
+tabsList[1].Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+CheckKeyBtn.MouseButton1Click:Connect(function()
+    if KeyInputBox.Text == VALID_KEY then
+        KeyPage.Visible = false
+        FunctionPage.Visible = true
+        TitleText.Text = "• SIGMA HUB - Functions"
+    else
+        CheckKeyBtn.Text = "คีย์ไม่ถูกต้อง!"
+        CheckKeyBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        task.delay(1.5, function()
+            CheckKeyBtn.Text = "Check Key"
+            CheckKeyBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 220)
+        end)
+    end
+end)
+
+-- [TAB 1: หน้าหลัก]
+CreateToggleRow(MainPage, "วิ่งเร็ว (Speed 350)", function(enabled)
+    isSpeedEnabled = enabled
+    pcall(function()
+        local character = LocalPlayer.Character
+        if character and character:FindFirstChildOfClass("Humanoid") then
+            if not enabled then
+                character:FindFirstChildOfClass("Humanoid").WalkSpeed = 16
+            end
+        end
+    end)
+end)
+
+CreateToggleRow(MainPage, "กระโดดสูง (Jump 200)", function(enabled)
+    isJumpEnabled = enabled
+    pcall(function()
+        local character = LocalPlayer.Character
+        if character and character:FindFirstChildOfClass("Humanoid") then
+            if not enabled then
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                humanoid.UseJumpPower = true
+                humanoid.JumpPower = 50
+            end
+        end
+    end)
+end)
+
+CreateToggleRow(MainPage, "กระโดดไม่จำกัด", function(enabled)
+    isInfJumpEnabled = enabled
+end)
+
+-- [TAB 2: ระบบ]
+CreateToggleRow(SystemPage, "ESP ผู้เล่น", function(enabled)
+    isPlayerESPEnabled = enabled
+    if not enabled then
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr.Character and plr.Character:FindFirstChild("Head") then
+                local oldGui = plr.Character.Head:FindFirstChild("SigmaESP")
+                if oldGui then oldGui:Destroy() end
+            end
+        end
+    end
+end)
+
+CreateToggleRow(SystemPage, "ESP ระยะ", function(enabled)
+    isDistanceESPEnabled = enabled
+end)
+
+CreateToggleRow(SystemPage, "ESP ชื่อสายรุ้ง", function(enabled)
+    isRainbowEnabled = enabled
+end)
+
+-- LOGICS & LOOPS
+UserInputService.JumpRequest:Connect(function()
+    if isInfJumpEnabled then
+        pcall(function()
+            local char = LocalPlayer.Character
+            if char and char:FindFirstChildOfClass("Humanoid") then
+                char:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end)
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    pcall(function()
+        if isPlayerESPEnabled then
+            local myChar = LocalPlayer.Character
+            local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
+
+            for _, plr in ipairs(Players:GetPlayers()) do
+                if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
+                    local head = plr.Character.Head
+                    local espGui = head:FindFirstChild("SigmaESP")
+
+                    if not espGui then
+                        espGui = Instance.new("BillboardGui")
+                        espGui.Name = "SigmaESP"
+                        espGui.AlwaysOnTop = true
+                        espGui.Size = UDim2.new(0, 200, 0, 50)
+                        espGui.StudsOffset = Vector3.new(0, 2.5, 0)
+                        espGui.Parent = head
+
+                        local nameLabel = Instance.new("TextLabel")
+                        nameLabel.Name = "NameLabel"
+                        nameLabel.Size = UDim2.new(1, 0, 0.5, 0)
+                        nameLabel.Position = UDim2.new(0, 0, 0, 0)
+                        nameLabel.BackgroundTransparency = 1
+                        nameLabel.Text = plr.DisplayName or plr.Name
+                        nameLabel.TextColor3 = Color3.fromRGB(0, 255, 100)
+                        nameLabel.TextSize = 18
+                        nameLabel.Font = Enum.Font.SourceSansBold
+                        nameLabel.TextStrokeTransparency = 0.2
+                        nameLabel.Parent = espGui
+
+                        local distLabel = Instance.new("TextLabel")
+                        distLabel.Name = "DistLabel"
+                        distLabel.Size = UDim2.new(1, 0, 0.4, 0)
+                        distLabel.Position = UDim2.new(0, 0, 0.5, 0)
+                        distLabel.BackgroundTransparency = 1
+                        distLabel.Text = ""
+                        distLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                        distLabel.TextSize = 13
+                        distLabel.Font = Enum.Font.SourceSans
+                        distLabel.TextStrokeTransparency = 0.3
+                        distLabel.Parent = espGui
+                    end
+
+                    local nameLabel = espGui:FindFirstChild("NameLabel")
+                    local distLabel = espGui:FindFirstChild("DistLabel")
+
+                    if nameLabel then
+                        if isRainbowEnabled then
+                            nameLabel.TextColor3 = Color3.fromHSV((tick() % 3) / 3, 1, 1)
+                        else
+                            nameLabel.TextColor3 = Color3.fromRGB(0, 255, 100)
+                        end
+                    end
+
+                    if distLabel then
+                        if isDistanceESPEnabled and myHRP and plr.Character:FindFirstChild("HumanoidRootPart") then
+                            local dist = math.floor((myHRP.Position - plr.Character.HumanoidRootPart.Position).Magnitude)
+                            distLabel.Text = "[" .. tostring(dist) .. " Studs]"
+                            distLabel.Visible = true
+                        else
+                            distLabel.Visible = false
+                        end
+                    end
+                end
+            end
+        end
+
+        if isRainbowEnabled and not isPlayerESPEnabled then
+            local character = LocalPlayer.Character
+            if character and character:FindFirstChild("Head") then
+                for _, v in ipairs(character.Head:GetChildren()) do
+                    if v:IsA("BillboardGui") and v.Name ~= "SigmaESP" then
+                        for _, label in ipairs(v:GetDescendants()) do
+                            if label:IsA("TextLabel") then
+                                label.TextColor3 = Color3.fromHSV((tick() % 3) / 3, 1, 1)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end)
+end)
+
+RunService.Heartbeat:Connect(function()
+    pcall(function()
+        local character = LocalPlayer.Character
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                if isSpeedEnabled then
+                    humanoid.WalkSpeed = 350
+                end
+                if isJumpEnabled then
+                    humanoid.UseJumpPower = true
+                    humanoid.JumpPower = 200
+                end
+            end
+        end
+    end)
+end)
