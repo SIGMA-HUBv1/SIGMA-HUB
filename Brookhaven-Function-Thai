@@ -11,7 +11,7 @@ if not LocalPlayer then
     LocalPlayer = Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
 end
 
-local VALID_KEY = "SiecvtpjdckTcRuiw1"
+local VALID_KEY = "psjqbziavakxzhq72182"
 local DISCORD_LINK = "https://discord.gg/4Eke4aFnm"
 
 -- State Variables
