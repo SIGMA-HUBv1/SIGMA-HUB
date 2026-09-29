@@ -222,7 +222,7 @@ local BuyKeyNotice = Instance.new("TextLabel")
 BuyKeyNotice.Size = UDim2.new(1, 0, 0, 30)
 BuyKeyNotice.Position = UDim2.new(0, 0, 0, 130)
 BuyKeyNotice.BackgroundTransparency = 1
-BuyKeyNotice.Text = "( คีย์มีแจกในดิสครับ.. )"
+BuyKeyNotice.Text = "( สคริปต์ปิดอัพเดท.. )"
 BuyKeyNotice.TextColor3 = Color3.fromRGB(180, 180, 190)
 BuyKeyNotice.TextSize = 14
 BuyKeyNotice.Font = Enum.Font.SourceSans
@@ -379,19 +379,19 @@ CheckKeyBtn.MouseButton1Click:Connect(function()
 end)
 
 -- [TAB 1: หน้าหลัก]
-CreateToggleRow(MainPage, "วิ่งเร็ว (Speed 350)", function(enabled)
+CreateToggleRow(MainPage, "วิ่งเร็ว ", function(enabled)
     isSpeedEnabled = enabled
     pcall(function()
         local character = LocalPlayer.Character
         if character and character:FindFirstChildOfClass("Humanoid") then
             if not enabled then
-                character:FindFirstChildOfClass("Humanoid").WalkSpeed = 16
+                character:FindFirstChildOfClass("Humanoid").WalkSpeed = 100
             end
         end
     end)
 end)
 
-CreateToggleRow(MainPage, "กระโดดสูง (Jump 200)", function(enabled)
+CreateToggleRow(MainPage, "กระโดดสูง", function(enabled)
     isJumpEnabled = enabled
     pcall(function()
         local character = LocalPlayer.Character
@@ -399,7 +399,7 @@ CreateToggleRow(MainPage, "กระโดดสูง (Jump 200)", function(ena
             if not enabled then
                 local humanoid = character:FindFirstChildOfClass("Humanoid")
                 humanoid.UseJumpPower = true
-                humanoid.JumpPower = 50
+                humanoid.JumpPower = 75
             end
         end
     end)
